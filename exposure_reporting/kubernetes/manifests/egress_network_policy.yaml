@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: exposure-reporting-egress-policy
+  namespace: analyplat
+spec:
+  podSelector:
+    matchLabels:
+      networking/allow-exposure-reporting-egress: "true"
+  policyTypes:
+    - Egress
+    - Ingress
+  egress:
+    - to:
+        # Jira
+        - ipBlock:
+            cidr: 10.100.1.115/32
+        # Datanado launch & monitor api
+        - ipBlock:
+            cidr: 10.156.0.0/18
+        # AWS-S3
+        - ipBlock:
+            cidr: 10.196.0.0/16
+    - ports:
+        - port: 443
+          protocol: TCP
+        - port: 1521
+          protocol: TCP
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              oracledatacloud.com/name: ingress-default
